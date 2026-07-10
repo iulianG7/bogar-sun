@@ -45,12 +45,6 @@ export default function AdminLayout({
             </div>
           </Link>
 
-          <Link href="/admin/projects">
-            <div className="rounded-xl p-4 hover:bg-zinc-800 cursor-pointer">
-              🏗 Obiecte
-            </div>
-          </Link>
-
           <Link href="/admin/salaries">
             <div className="rounded-xl p-4 hover:bg-zinc-800 cursor-pointer">
               💰 Salarii
