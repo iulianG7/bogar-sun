@@ -138,7 +138,7 @@ const totalHours = filteredReports.reduce(
 
       {selectedYear === year && (
 
-        <div className="grid grid-cols-3 gap-3 border-t border-zinc-800 p-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 border-t border-zinc-800 p-4 md:p-5">
 
           {[
             "Ianuarie",
@@ -163,7 +163,7 @@ const totalHours = filteredReports.reduce(
         selectedMonth === month ? null : month
       )
     }
-    className="w-full rounded-xl bg-zinc-800 p-4 text-left hover:bg-yellow-400 hover:text-black transition"
+    className="w-full rounded-2xl bg-zinc-800 p-5 text-lg font-semibold text-left hover:bg-yellow-400 hover:text-black transition"
   >
     {selectedMonth === month ? "▼ " : "▶ "}
     {month}
@@ -185,7 +185,7 @@ const totalHours = filteredReports.reduce(
 
         <div
           key={report.id}
-          className="rounded-xl bg-zinc-900 border border-zinc-800 p-4"
+          className="w-full rounded-3xl bg-zinc-900 border border-zinc-800 p-5"
         >
           <p className="text-yellow-400 font-semibold">
   {(() => {
@@ -208,9 +208,15 @@ const totalHours = filteredReports.reduce(
     );
   })()}
 </p>
-          <p>📍 {report.project || "-"}</p>
-          <p>⚡ {report.kwp} kWp</p>
-          <p>🕒 {report.hours} ore</p>
+          <p className="mt-3 text-lg">📍 {report.project || "-"}</p>
+
+<p className="mt-2 text-lg">
+⚡ {report.kwp} kWp
+</p>
+
+<p className="mt-2 text-lg">
+🕒 {report.hours} ore
+</p>
 
           {!report.didWork && (
             <p className="text-red-400">
@@ -226,7 +232,7 @@ const totalHours = filteredReports.reduce(
 
     <div className="border-t border-zinc-700 pt-4 mt-6">
 
-  <h3 className="text-2xl font-bold text-yellow-400">
+  <h3 className="text-2xl md:text-3xl font-black text-yellow-400">
     📊 Total {selectedMonth}
   </h3>
 
