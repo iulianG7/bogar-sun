@@ -123,19 +123,19 @@ const workedDays = reports.filter((report) => report.didWork).length;
   return (
     <main className="min-h-screen bg-[#0b0b0b] text-white px-6 py-8 pb-40">
 
-  <div className="flex justify-between items-start mb-10">
+  <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-start mb-10">
 
   <div>
-    <h1 className="text-5xl font-extrabold">
+    <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
       Bun venit, <span className="text-yellow-400">{workerName}</span> 👋
     </h1>
 
-    <p className="mt-2 text-2xl text-zinc-400">
+    <p className="mt-2 text-lg md:text-2xl text-zinc-400">
       {teamName}
     </p>
   </div>
 
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-3 self-start md:self-auto">
     <div className="rounded-xl bg-yellow-400/10 p-3">
       <CalendarDays className="h-8 w-8 text-yellow-400" />
     </div>
@@ -156,7 +156,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
 
     </div>
 
-      <div className="mt-10 rounded-[28px] border border-zinc-800 bg-[#121212] p-8 shadow-2xl">
+      <div className="mt-8 rounded-[28px] border border-zinc-800 bg-[#121212] p-5 md:p-8 shadow-2xl">
 
         <h2 className="mb-8 flex items-center gap-3 text-4xl font-bold">
 
@@ -170,7 +170,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
 
   <div>
 
-<div className="grid grid-cols-3 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
   <div>
     <label className="mb-2 block text-zinc-400">
@@ -223,7 +223,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
     Nu am lucrat azi
   </p>
 
-  <div className="flex gap-4">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
     <button
       onClick={() => {
@@ -284,11 +284,11 @@ const workedDays = reports.filter((report) => report.didWork).length;
   📊 Statistici rapide
 </h2>
 
-<div className="grid grid-cols-3 gap-6 mt-8">
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
 
   <div className="rounded-[28px] bg-gradient-to-b from-[#1a1a1a] to-[#101010] border border-zinc-800 shadow-2xl p-7 transition hover:scale-[1.03]">
 
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
 
       <div className="h-14 w-14 rounded-2xl bg-yellow-400/15 flex items-center justify-center text-3xl">
         ⚡
@@ -425,7 +425,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
 
       </div>
 
-<div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[95%] max-w-md rounded-[30px] border border-zinc-800 bg-[#161616]/95 backdrop-blur-xl shadow-2xl p-3">
+<div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[96%] max-w-md rounded-[30px] border border-zinc-800 bg-[#161616]/95 backdrop-blur-xl shadow-2xl p-3">
 
   <div className="grid grid-cols-4">
 
