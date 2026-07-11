@@ -39,16 +39,16 @@ export default function AdminDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
+    <main className="min-h-screen bg-[#0b0b0b] text-white px-4 md:px-8 py-6 pb-32">
 
-      <h1 className="text-4xl font-bold text-yellow-400 mb-8">
+      <h1 className="mb-8 text-3xl md:text-5xl font-black text-yellow-400">
         Dashboard Administrator
       </h1>
 
       <div className="space-y-5">
 
       {reports.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-center text-zinc-400">
+          <div className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#1a1a1a] to-[#101010] p-5 shadow-2xl">
             Nu există rapoarte.
           </div>
         ) : (
@@ -57,11 +57,11 @@ export default function AdminDashboard() {
               key={report.id}
               className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-5">
 
-                <div className="space-y-2">
+                <div className="space-y-3 text-lg">
 
-                  <h2 className="text-2xl font-bold text-yellow-400">
+                  <h2 className="text-2xl md:text-3xl font-black text-yellow-400">
                     {report.worker}
                   </h2>
 
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
 
                 <button
                   onClick={() => deleteReport(report.id)}
-                  className="rounded-xl bg-red-600 px-5 py-2 font-bold hover:bg-red-700"
+                  className="w-full md:w-auto rounded-2xl bg-red-600 py-4 px-8 text-lg font-bold transition hover:bg-red-700"
                 >
                   Șterge
                 </button>
