@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Bogar Sun Management",
     start_url: "/",
     display: "standalone",
-    background_color: "#0b0b0b",
+    background_color: "#000000",
     theme_color: "#facc15",
     orientation: "portrait",
     icons: [
