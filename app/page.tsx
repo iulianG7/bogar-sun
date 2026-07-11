@@ -41,19 +41,21 @@ export default function Home() {
 
   return (
     <main
-  className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-6"
+    
+  className="min-h-screen flex items-center justify-center bg-cover md:bg-cover bg-top md:bg-center bg-no-repeat p-4"
   style={{
     backgroundImage: "url('/temp.png')",
   }}
 >
-      <div className="w-full max-w-md rounded-3xl border border-white/20 bg-black/55 backdrop-blur-xl p-8 shadow-2xl">
+      <div className="w-full max-w-sm rounded-3xl border border-white/20 bg-black/60 backdrop-blur-xl p-6 shadow-2xl">
 
         <div className="flex justify-center mb-8">
           <Image
             src="/logo.png"
             alt="Bogar Sun"
-            width={220}
-            height={220}
+            width={280}
+            height={280}
+            className="w-40 h-auto mx-auto"
             priority
           />
         </div>
