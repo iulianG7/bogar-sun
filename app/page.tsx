@@ -43,7 +43,7 @@ export default function Home() {
     <main
   className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-6"
   style={{
-    backgroundImage: "url('/login-bg.png')",
+    backgroundImage: "url('/temp.png')",
   }}
 >
       <div className="w-full max-w-md rounded-3xl border border-white/20 bg-black/55 backdrop-blur-xl p-8 shadow-2xl">
