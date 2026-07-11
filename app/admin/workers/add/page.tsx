@@ -10,40 +10,42 @@ export default function AddWorkerPage() {
   const [team, setTeam] = useState(1);
 
   const saveWorker = async () => {
-  const response = await fetch("/api/create-worker", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      firstName,
-      lastName,
-      phone,
-      team,
-    }),
-  });
+  try {
+    alert("Buton apăsat");
 
-  const data = await response.json();
+    const response = await fetch("/api/create-worker", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        phone,
+        team,
+      }),
+    });
 
-  if (!data.success) {
-    alert(data.message);
-    return;
+    alert("Status: " + response.status);
+
+    const data = await response.json();
+
+    if (!data.success) {
+      alert(data.message);
+      return;
+    }
+
+    alert("Lucrător creat cu succes!");
+
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setTeam(1);
+
+  } catch (error: any) {
+    alert(error.message || "Eroare necunoscută");
+    console.error(error);
   }
-
-  alert(
-`Lucrător creat!
-
-Login:
-${data.email}
-
-Parolă:
-${data.password}`
-  );
-
-  setFirstName("");
-  setLastName("");
-  setPhone("");
-  setTeam(1);
 };
 
   return (
