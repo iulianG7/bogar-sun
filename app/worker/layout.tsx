@@ -12,16 +12,15 @@ export default function WorkerLayout({
   return (
     <Protected>
       <main className="min-h-screen bg-[#0b0b0b] text-white pb-40">
-        <div className="absolute top-1 right-50">
-
+        <div className="flex justify-center -mb-6 pt-2">
   <Image
     src="/logo.png"
     alt="Bogar Sun"
     width={220}
     height={220}
     priority
+    className="w-40 md:w-52 h-auto"
   />
-
 </div>
         {children}
         <WorkerBottomNav />
