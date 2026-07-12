@@ -11,7 +11,6 @@ export default function AddWorkerPage() {
 
   const saveWorker = async () => {
   try {
-    alert("Buton apăsat");
 
     const response = await fetch("/api/create-worker", {
       method: "POST",
@@ -26,16 +25,23 @@ export default function AddWorkerPage() {
       }),
     });
 
-    alert("Status: " + response.status);
-
     const data = await response.json();
+
+    console.log(data);
+alert(JSON.stringify(data));
 
     if (!data.success) {
       alert(data.message);
       return;
     }
 
-    alert("Lucrător creat cu succes!");
+    alert(`✅ Lucrător creat!
+
+Login:
+${data.email}
+
+Parolă:
+${data.password}`);
 
     setFirstName("");
     setLastName("");
