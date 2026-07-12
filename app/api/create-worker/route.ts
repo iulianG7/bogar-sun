@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
     console.log(email);
     const password = `${lastName}.${firstName}2026!`;
 
+    console.log("Email:", email);
+    console.log("Password:", password);
     const user = await adminAuth.createUser({
       email,
       password,
