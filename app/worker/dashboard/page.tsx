@@ -158,7 +158,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
 
       <div className="mt-8 rounded-[28px] border border-zinc-800 bg-[#121212] p-5 md:p-8 shadow-2xl">
 
-        <h2 className="mb-8 flex items-center gap-3 text-4xl font-bold">
+        <h2 className="mb-8 flex items-center gap-3 text-2xl md:text-4xl font-black">
 
   <span className="text-yellow-400">📋</span>
 
@@ -166,9 +166,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
 
 </h2>
 
-        <div className="grid grid-cols-3 gap-5 mt-6">
-
-  <div>
+<div className="mt-6">
 
 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -209,8 +207,6 @@ const workedDays = reports.filter((report) => report.didWork).length;
       placeholder="Ex: 8"
       className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
     />
-  </div>
-
 </div>
 
 </div>
