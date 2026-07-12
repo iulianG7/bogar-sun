@@ -27,9 +27,6 @@ export default function AddWorkerPage() {
 
     const data = await response.json();
 
-    console.log(data);
-alert(JSON.stringify(data));
-
     if (!data.success) {
       alert(data.message);
       return;
