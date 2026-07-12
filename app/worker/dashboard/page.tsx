@@ -81,7 +81,7 @@ const unsubscribeReports = onSnapshot(q, (snapshot) => {
   const router = useRouter();
   const logout = async () => {
   await signOut(auth);
-  router.push("/login");
+  router.push("/");
 };
   const totalKwp = reports.reduce(
   (sum, report) => sum + (Number(report.kwp) || 0),
