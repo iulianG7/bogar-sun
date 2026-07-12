@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import {
@@ -29,6 +30,19 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [rememberMe, setRememberMe] = useState(true);
+  useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (!user) return;
+
+    if (user.email === "admin@bogarsun.com") {
+      router.replace("/admin/dashboard");
+    } else {
+      router.replace("/worker/dashboard");
+    }
+  });
+
+  return () => unsubscribe();
+}, [router]);
 
   async function login() {
     setLoading(true);
