@@ -181,7 +181,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
       value={project}
       onChange={(e) => setProject(e.target.value)}
       placeholder="Ex: Enerix Krefeld"
-      className="w-full rounded-2xl border border-zinc-700 bg-[#0d0d0d] p-4 text-lg focus:border-yellow-400 outline-none"
+      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
     />
   </div>
 
@@ -193,8 +193,8 @@ const workedDays = reports.filter((report) => report.didWork).length;
     <input
       value={kwp}
       onChange={(e) => setKwp(e.target.value)}
-      placeholder="Ex: 35.4"
-      className="w-full rounded-2xl border border-zinc-700 bg-[#0d0d0d] p-4 text-lg focus:border-yellow-400 outline-none"
+      placeholder="Ex: 10.8"
+      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
     />
   </div>
 
@@ -207,7 +207,7 @@ const workedDays = reports.filter((report) => report.didWork).length;
       value={hours}
       onChange={(e) => setHours(e.target.value)}
       placeholder="Ex: 8"
-      className="w-full rounded-2xl border border-zinc-700 bg-[#0d0d0d] p-4 text-lg focus:border-yellow-400 outline-none"
+      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
     />
   </div>
 
