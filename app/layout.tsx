@@ -1,31 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const geist = Geist({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-geist",
 });
 
 export const metadata: Metadata = {
-  title: "Bogar Sun",
-  description: "Bogar Sun Management",
-
+  title: "Bogar Sun Management",
+  description: "Premium Solar Management System",
   manifest: "/manifest.webmanifest",
-
-  themeColor: "#0b0b0b",
-
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Bogar Sun",
-  },
-
+  themeColor: "#09090B",
   icons: {
     icon: "/icon-192.png",
     apple: "/icon-192.png",
@@ -34,15 +21,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="ro"
+      suppressHydrationWarning
+      className={geist.variable}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="bg-[#09090B] text-white antialiased overflow-x-hidden">
+        {children}
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

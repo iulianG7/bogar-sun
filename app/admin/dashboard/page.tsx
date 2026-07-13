@@ -1,96 +1,279 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
+import { useEffect, useMemo, useState } from "react";
 import {
   collection,
   onSnapshot,
-  query,
   orderBy,
-  deleteDoc,
-  doc,
+  query,
 } from "firebase/firestore";
 
-export default function AdminDashboard() {
-  const [reports, setReports] = useState<any[]>([]);
+import { db } from "@/lib/firebase";
+
+import HeroBanner from "@/components/dashboard/HeroBanner";
+import StatsCards from "@/components/dashboard/StatsCards";
+import ProductionChart from "@/components/dashboard/ProductionChart";
+import TeamsCard from "@/components/dashboard/TeamsCard";
+import TopWorkers from "@/components/dashboard/TopWorkers";
+import LatestReports from "@/components/dashboard/LatestReports";
+
+interface Report {
+  id: string;
+  worker: string;
+  project: string;
+  kwp: number;
+  hours: number;
+  didWork: boolean;
+  reason?: string;
+  createdAt: any;
+}
+
+interface Worker {
+  id: string;
+  name: string;
+  team: string;
+}
+
+export default function DashboardPage() {
+
+  const [reports, setReports] = useState<Report[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
   useEffect(() => {
-    const q = query(
+
+    const reportsQuery = query(
       collection(db, "reports"),
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    const workersQuery = query(
+      collection(db, "workers")
+    );
 
-      setReports(data);
+    const unsubReports = onSnapshot(reportsQuery, (snapshot) => {
+
+      setReports(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+        }))
+      );
+
     });
 
-    return () => unsubscribe();
+    const unsubWorkers = onSnapshot(workersQuery, (snapshot) => {
+
+      setWorkers(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+        }))
+      );
+
+    });
+
+    return () => {
+
+      unsubReports();
+      unsubWorkers();
+
+    };
+
   }, []);
 
-  const deleteReport = async (id: string) => {
-    if (!confirm("Ștergi raportul?")) return;
+  const totalKwp = useMemo(() => {
 
-    await deleteDoc(doc(db, "reports", id));
-  };
+    return reports.reduce(
+      (sum, report) => sum + Number(report.kwp || 0),
+      0
+    );
+
+  }, [reports]);
+
+  const totalHours = useMemo(() => {
+
+    return reports.reduce(
+      (sum, report) => sum + Number(report.hours || 0),
+      0
+    );
+
+  }, [reports]);
 
   return (
-    <main className="min-h-screen bg-[#0b0b0b] text-white px-4 md:px-8 py-6 pb-32">
 
-      <h1 className="mb-8 text-3xl md:text-5xl font-black text-yellow-400">
-        Dashboard Administrator
-      </h1>
+    <div className="space-y-8">
 
-      <div className="space-y-5">
+      <HeroBanner />
 
-      {reports.length === 0 ? (
-          <div className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#1a1a1a] to-[#101010] p-5 shadow-2xl">
-            Nu există rapoarte.
-          </div>
-        ) : (
-          reports.map((report) => (
-            <div
-              key={report.id}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
-            >
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-5">
+      <StatsCards
+        totalKwp={totalKwp}
+        totalHours={totalHours}
+        totalWorkers={workers.length}
+      />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-                <div className="space-y-3 text-lg">
+        {/* Grafic */}
 
-                  <h2 className="text-2xl md:text-3xl font-black text-yellow-400">
-                    {report.worker}
-                  </h2>
+        <div className="xl:col-span-2">
 
-                  <p>📍 Obiect: {report.project}</p>
-                  <p>⚡ kWp: {report.kwp}</p>
-                  <p>🕒 Ore: {report.hours}</p>
+          <ProductionChart />
 
-                  {!report.didWork && (
-                    <p className="text-red-400">
-                      Motiv: {report.reason}
-                    </p>
-                  )}
+        </div>
 
-                </div>
+        {/* Echipe */}
 
-                <button
-                  onClick={() => deleteReport(report.id)}
-                  className="w-full md:w-auto rounded-2xl bg-red-600 py-4 px-8 text-lg font-bold transition hover:bg-red-700"
-                >
-                  Șterge
-                </button>
-
-              </div>
-            </div>
-          ))
-        )}
+        <TeamsCard
+          workers={workers}
+        />
 
       </div>
 
-    </main>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+
+        {/* Top lucrători */}
+
+        <TopWorkers
+          reports={reports}
+        />
+
+        {/* Ultimele rapoarte */}
+
+        <LatestReports
+          reports={reports}
+        />
+
+      </div>
+
+      {/* Dashboard Summary */}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
+        <div className="group relative overflow-hidden rounded-[30px] border border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-transparent p-7 backdrop-blur-xl">
+
+          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-yellow-500/10 blur-3xl transition group-hover:scale-150" />
+
+          <p className="text-zinc-400">
+            Total rapoarte
+          </p>
+
+          <h2 className="mt-5 text-5xl font-black text-yellow-400">
+            {reports.length}
+          </h2>
+
+        </div>
+
+        <div className="group relative overflow-hidden rounded-[30px] border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-transparent p-7 backdrop-blur-xl">
+
+          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl transition group-hover:scale-150" />
+
+          <p className="text-zinc-400">
+            Echipe
+          </p>
+
+          <h2 className="mt-5 text-5xl font-black text-blue-400">
+            2
+          </h2>
+
+        </div>
+
+        <div className="group relative overflow-hidden rounded-[30px] border border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent p-7 backdrop-blur-xl">
+
+          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-green-500/10 blur-3xl transition group-hover:scale-150" />
+
+          <p className="text-zinc-400">
+            Lucrători activi
+          </p>
+
+          <h2 className="mt-5 text-5xl font-black text-green-400">
+            {workers.length}
+          </h2>
+
+        </div>
+
+        <div className="group relative overflow-hidden rounded-[30px] border border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-transparent p-7 backdrop-blur-xl">
+
+          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-purple-500/10 blur-3xl transition group-hover:scale-150" />
+
+          <p className="text-zinc-400">
+            Status
+          </p>
+
+          <h2 className="mt-5 text-4xl font-black text-purple-400">
+            Online
+          </h2>
+
+          <p className="mt-3 text-zinc-500">
+            Firebase sincronizat
+          </p>
+
+        </div>
+
+      </div>
+      {/* Footer Dashboard */}
+
+      <div className="rounded-[32px] border border-white/10 bg-gradient-to-r from-zinc-900/80 via-zinc-900/60 to-yellow-500/10 p-8 backdrop-blur-xl">
+
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+
+          <div>
+
+            <p className="text-sm uppercase tracking-[4px] text-yellow-400">
+              Bogar Sun Management
+            </p>
+
+            <h2 className="mt-3 text-4xl font-black">
+              Dashboard Premium
+            </h2>
+
+            <p className="mt-4 max-w-2xl text-zinc-400">
+              Monitorizează echipele, rapoartele și productivitatea în timp real.
+              Toate datele sunt sincronizate automat cu Firebase.
+            </p>
+
+          </div>
+
+          <div className="grid grid-cols-2 gap-5">
+
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-6 text-center">
+
+              <div className="text-5xl font-black text-yellow-400">
+
+                {totalKwp}
+
+              </div>
+
+              <div className="mt-2 text-zinc-500">
+
+                kWp instalați
+
+              </div>
+
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-6 text-center">
+
+              <div className="text-5xl font-black text-green-400">
+
+                {totalHours}
+
+              </div>
+
+              <div className="mt-2 text-zinc-500">
+
+                Ore lucrate
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
   );
+
 }
