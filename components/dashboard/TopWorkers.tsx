@@ -5,7 +5,7 @@ import { Trophy, Medal, Award } from "lucide-react";
 
 interface Report {
   worker?: string;
-  workerName: string;
+  workerName?: string;
   kwp: number;
   hours: number;
 }
