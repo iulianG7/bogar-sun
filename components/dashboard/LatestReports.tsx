@@ -5,7 +5,8 @@ import { Clock3, MapPin, Zap } from "lucide-react";
 
 interface Report {
   id: string;
-  workerName: string;
+  worker?: string;
+  workerName?: string;
   project: string;
   kwp: number;
   hours: number;
@@ -57,7 +58,7 @@ export default function LatestReports({ reports }: Props) {
               <div>
 
                 <h3 className="text-xl font-bold text-yellow-400">
-                  {report.workerName}
+                  {report.workerName || report.worker || "Fără nume"}
                 </h3>
 
                 <div className="mt-3 flex flex-wrap gap-4 text-zinc-400">
