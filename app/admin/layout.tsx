@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -15,7 +18,6 @@ import {
   Users,
   UserCircle,
   FileText,
-  BarChart3,
   Settings,
   LogOut,
   SunMedium,
@@ -44,11 +46,6 @@ const menu = [
     icon: FileText,
   },
   {
-    title: "Statistici",
-    href: "/admin/statistics",
-    icon: BarChart3,
-  },
-  {
     title: "Setări",
     href: "/admin/settings",
     icon: Settings,
@@ -61,7 +58,19 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const logout = async () => {
+
+  const ok = confirm("Sigur dorești să ieși?");
+
+  if (!ok) return;
+
+  await signOut(auth);
+
+  router.replace("/");
+
+};
 
   return (
     <Protected>
@@ -236,21 +245,9 @@ export default function AdminLayout({
                   </div>
 
                   <button
-                    className="
-                      mt-5
-                      flex
-                      w-full
-                      items-center
-                      justify-center
-                      gap-3
-                      rounded-2xl
-                      bg-red-500
-                      py-4
-                      font-bold
-                      transition
-                      hover:bg-red-600
-                    "
-                  >
+  onClick={logout}
+  className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold transition hover:bg-red-600"
+>
 
                     <LogOut size={20} />
 

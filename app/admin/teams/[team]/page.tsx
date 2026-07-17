@@ -24,7 +24,10 @@ interface Worker {
 }
 
 interface Report {
-  worker: string;
+  worker?: string;
+  workerId?: string;
+  workerName?: string;
+  team?: string | number;
   kwp: number;
   hours: number;
 }
@@ -126,8 +129,10 @@ export default function TeamPage({
         );
 
         const workerReports = reports.filter(
-          (r) => r.worker === workerName
-        );
+    (r) =>
+    r.workerId === worker.uid ||
+    r.workerName === workerName
+);
 
         const totalKwp = workerReports.reduce(
           (sum, r) => sum + Number(r.kwp || 0),
@@ -218,7 +223,7 @@ export default function TeamPage({
 
                   <h3 className="mt-3 text-4xl font-black text-yellow-400">
 
-                    {totalKwp}
+                    {totalKwp.toFixed(2)}
 
                   </h3>
 

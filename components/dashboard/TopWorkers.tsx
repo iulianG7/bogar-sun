@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { Trophy, Medal, Award } from "lucide-react";
 
 interface Report {
-  worker: string;
+  worker?: string;
+  workerName: string;
   kwp: number;
   hours: number;
 }
@@ -16,20 +17,22 @@ interface Props {
 export default function TopWorkers({ reports }: Props) {
   const workers = Object.values(
     reports.reduce((acc: any, report) => {
-      if (!acc[report.worker]) {
-        acc[report.worker] = {
-          name: report.worker,
+        const name = report.workerName || report.worker || "Fără nume";
+      if (!acc[name]) {
+        acc[name] = {
+          name,
           kwp: 0,
           hours: 0,
         };
       }
 
-      acc[report.worker].kwp += Number(report.kwp || 0);
-      acc[report.worker].hours += Number(report.hours || 0);
+      acc[name].kwp += Number(report.kwp || 0);
+      acc[name].hours += Number(report.hours || 0);
 
       return acc;
     }, {})
   )
+
     .sort((a: any, b: any) => b.kwp - a.kwp)
     .slice(0, 5);
 
@@ -97,7 +100,7 @@ export default function TopWorkers({ reports }: Props) {
             <div className="text-right">
 
               <div className="text-3xl font-black text-yellow-400">
-                {worker.kwp}
+                {worker.kwp.toFixed(2)}
               </div>
 
               <div className="text-zinc-500">

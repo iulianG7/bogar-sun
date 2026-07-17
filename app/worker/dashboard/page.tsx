@@ -1,470 +1,411 @@
 "use client";
 
-import { useState } from "react";
+import {
+  Bell,
+  Zap,
+  Clock3,
+  MapPin,
+  History,
+  ArrowRight,
+  ClipboardPlus,
+} from "lucide-react";
+
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import Link from "next/link";
+import { getWeather } from "@/lib/weather";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
 import {
   collection,
-  addDoc,
-  serverTimestamp,
-  query,
   where,
-  orderBy,
-  limit,
   onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect } from "react";
-import { CalendarDays } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
-import { signOut } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import {
-  House,
-  ClipboardList,
-  BarChart3,
-  User,
-} from "lucide-react";
 
 export default function WorkerDashboard() {
-  const today = new Date();
 
-  const formattedDate = today.toLocaleDateString("ro-RO", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-const [workerName, setWorkerName] = useState("");
-const [teamName, setTeamName] = useState("");
+    const [now, setNow] = useState(new Date());
+    const [weather, setWeather] = useState<any>(null);
+    const [reports, setReports] = useState<any[]>([]);
+    const [user, setUser] = useState<any>(null);
+
 useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-
-    const { doc, getDoc } = await import("firebase/firestore");
-
-    const snap = await getDoc(doc(db, "workers", user.uid));
-
-if (snap.exists()) {
-  const data = snap.data();
-
-  setWorkerName(data.name);
-  setTeamName(`Echipa ${data.team}`);
-  const q = query(
-  collection(db, "reports"),
-  where("worker", "==", data.name),
-  orderBy("createdAt", "desc"),
-  limit(10)
-);
-
-const unsubscribeReports = onSnapshot(q, (snapshot) => {
-  setReports(
-    snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-  );
-});
-}
+  const unsub = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
   });
 
-  return () => unsubscribe();
+  return () => unsub();
 }, []);
 
-  const [project, setProject] = useState("");
-  const [kwp, setKwp] = useState("");
-  const [hours, setHours] = useState("");
-  const [didWork, setDidWork] = useState(true);
-  const [reason, setReason] = useState("");
-  const [reports, setReports] = useState<any[]>([]);
-  const router = useRouter();
-  const logout = async () => {
-  await signOut(auth);
-  router.push("/");
-};
-  const totalKwp = reports.reduce(
-  (sum, report) => sum + (Number(report.kwp) || 0),
+useEffect(() => {
+  const timer = setInterval(() => {
+    setNow(new Date());
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+useEffect(() => {
+
+  navigator.geolocation.getCurrentPosition(async (position) => {
+
+    const data = await getWeather(
+      position.coords.latitude,
+      position.coords.longitude
+    );
+
+    setWeather(data);
+
+  });
+
+}, []);
+
+useEffect(() => {
+  if (!auth.currentUser) return;
+
+  const q = query(
+  collection(db, "reports"),
+  where("workerId", "==", auth.currentUser.uid),
+  orderBy("createdAt", "desc")
+);
+
+  const unsub = onSnapshot(q, (snapshot) => {
+    setReports(
+      snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+    );
+  });
+
+  return () => unsub();
+}, []);
+
+console.log(reports);
+const totalKw = reports.reduce(
+  (sum, report) => sum + Number(report.kwp || 0),
   0
 );
 
 const totalHours = reports.reduce(
-  (sum, report) => sum + (Number(report.hours) || 0),
+  (sum, report) => sum + Number(report.hours || 0),
   0
 );
 
-const workedDays = reports.filter((report) => report.didWork).length;
-  const sendReport = async () => {
-  try {
-    await addDoc(collection(db, "reports"), {
-  worker: workerName,
-  project,
-  kwp: Number(kwp),
-  hours: Number(hours),
-  didWork,
-  reason,
-  createdAt: serverTimestamp(),
+const lastReport = reports[0];
+
+const currentTime = now.toLocaleTimeString("ro-RO", {
+  hour: "2-digit",
+  minute: "2-digit",
 });
 
-    alert("✅ Raport trimis cu succes!");
-
-    router.refresh();
-    setProject("");
-    setKwp("");
-    setHours("");
-    setDidWork(true);
-    setReason("");
-}   catch (error: any) {
-  console.error(error);
-  alert(error.message);
-}
-};
+const currentDate = now.toLocaleDateString("ro-RO", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
   return (
-    <main className="min-h-screen bg-[#0b0b0b] text-white px-6 py-8 pb-40">
 
-  <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-start mb-10">
+    <div className="space-y-5 pb-28">
 
-  <div>
-    <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
-      Bun venit, <span className="text-yellow-400">{workerName}</span> 👋
-    </h1>
+      {/* HEADER */}
 
-    <p className="mt-2 text-lg md:text-2xl text-zinc-400">
-      {teamName}
-    </p>
-  </div>
-
-  <div className="flex items-center gap-3 self-start md:self-auto">
-    <div className="rounded-xl bg-yellow-400/10 p-3">
-      <CalendarDays className="h-8 w-8 text-yellow-400" />
-    </div>
-
-    <div>
-      <p className="text-2xl font-bold">
-        {today.toLocaleDateString("ro-RO")}
-      </p>
-
-      <p className="text-zinc-400 capitalize">
-        {today.toLocaleDateString("ro-RO", {
-          weekday: "long",
-        })}
-     </p>
-         </div>
-
-      </div>
-
-    </div>
-
-      <div className="mt-8 rounded-[28px] border border-zinc-800 bg-[#121212] p-5 md:p-8 shadow-2xl">
-
-        <h2 className="mb-8 flex items-center gap-3 text-2xl md:text-4xl font-black">
-
-  <span className="text-yellow-400">📋</span>
-
-  Raportul de azi
-
-</h2>
-
-<div className="mt-6">
-
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-  <div>
-    <label className="mb-2 block text-zinc-400">
-      🏠 Obiect
-    </label>
-
-    <input
-      value={project}
-      onChange={(e) => setProject(e.target.value)}
-      placeholder="Ex: Enerix Krefeld"
-      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
-    />
-  </div>
-
-  <div>
-    <label className="mb-2 block text-zinc-400">
-      ⚡ kWp instalați
-    </label>
-
-    <input
-      value={kwp}
-      onChange={(e) => setKwp(e.target.value)}
-      placeholder="Ex: 10.8"
-      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
-    />
-  </div>
-
-  <div>
-    <label className="mb-2 block text-zinc-400">
-      ⏰ Ore lucrate
-    </label>
-
-    <input
-      value={hours}
-      onChange={(e) => setHours(e.target.value)}
-      placeholder="Ex: 8"
-      className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl text-white placeholder:text-zinc-500 focus:border-yellow-400 focus:outline-none"
-    />
-</div>
-
-</div>
-
-</div>
-
-        <div className="mt-8">
-
-  <p className="mb-4 text-xl font-semibold">
-    Nu am lucrat azi
-  </p>
-
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-    <button
-      onClick={() => {
-        setDidWork(false);
-        setReason("Medical");
-      }}
-      className={`rounded-2xl border px-6 py-4 font-semibold transition ${
-        reason === "Medical"
-          ? "bg-red-600 border-red-600"
-          : "border-zinc-700 bg-zinc-900 hover:border-red-500"
-      }`}
-    >
-      ❤️ Medical
-    </button>
-
-    <button
-      onClick={() => {
-        setDidWork(false);
-        setReason("Ploaie");
-      }}
-      className={`rounded-2xl border px-6 py-4 font-semibold transition ${
-        reason === "Ploaie"
-          ? "bg-blue-600 border-blue-600"
-          : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
-      }`}
-    >
-      🌧️ Ploaie
-    </button>
-
-    <button
-      onClick={() => {
-        setDidWork(false);
-        setReason("Nu este obiect");
-      }}
-      className={`rounded-2xl border px-6 py-4 font-semibold transition ${
-        reason === "Nu este obiect"
-          ? "bg-yellow-500 text-black border-yellow-500"
-          : "border-zinc-700 bg-zinc-900 hover:border-yellow-400"
-      }`}
-    >
-      📍 Nu este obiect
-    </button>
-
-  </div>
-
-</div>
-
-        <button
-          onClick={sendReport}
-          className="mt-8 w-full rounded-2xl bg-yellow-400 text-black font-bold text-2xl py-5 hover:bg-yellow-300 transition"
-        >
-          📤 Trimite raport
-        </button>
-
-      </div>
-
-<h2 className="text-3xl font-bold mt-10 mb-6">
-  📊 Statistici rapide
-</h2>
-
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
-
-  <div className="rounded-[28px] bg-gradient-to-b from-[#1a1a1a] to-[#101010] border border-zinc-800 shadow-2xl p-7 transition hover:scale-[1.03]">
-
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-
-      <div className="h-14 w-14 rounded-2xl bg-yellow-400/15 flex items-center justify-center text-3xl">
-        ⚡
-      </div>
-
-      <p className="text-zinc-500 text-sm">
-        Luna aceasta
-      </p>
-
-    </div>
-
-    <h1 className="mt-8 text-5xl font-black">
-      {totalKwp.toFixed(1)}
-    </h1>
-
-    <p className="mt-2 text-zinc-400">
-      kWp instalați
-    </p>
-
-  </div>
-
-  <div className="rounded-[28px] bg-gradient-to-b from-[#1a1a1a] to-[#101010] border border-zinc-800 shadow-2xl p-7 transition hover:scale-[1.03]">
-
-    <div className="flex items-center justify-between">
-
-      <div className="h-14 w-14 rounded-2xl bg-sky-500/15 flex items-center justify-center text-3xl">
-        🕒
-      </div>
-
-      <p className="text-zinc-500 text-sm">
-        Luna aceasta
-      </p>
-
-    </div>
-
-    <h1 className="mt-8 text-5xl font-black">
-      {totalHours}
-    </h1>
-
-    <p className="mt-2 text-zinc-400">
-      Ore lucrate
-    </p>
-
-  </div>
-
-  <div className="rounded-[28px] bg-gradient-to-b from-[#1a1a1a] to-[#101010] border border-zinc-800 shadow-2xl p-7 transition hover:scale-[1.03]">
-
-    <div className="flex items-center justify-between">
-
-      <div className="h-14 w-14 rounded-2xl bg-green-500/15 flex items-center justify-center text-3xl">
-        📅
-      </div>
-
-      <p className="text-zinc-500 text-sm">
-        Luna aceasta
-      </p>
-
-    </div>
-
-    <h1 className="mt-8 text-5xl font-black">
-      {workedDays}
-    </h1>
-
-    <p className="mt-2 text-zinc-400">
-      Zile lucrate
-    </p>
-
-  </div>
-
-</div>
-
-      <div className="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-
-        <h2 className="text-3xl font-bold mt-10 mb-6">
-  📋 Ultimele rapoarte
-</h2>
-
-<div className="space-y-4">
-
-  {reports.length === 0 ? (
-
-    <div className="rounded-2xl border border-zinc-800 bg-gradient-to-b from-[#1a1a1a] to-[#101010] p-8 text-center text-zinc-400">
-      Nu există încă rapoarte.
-    </div>
-
-  ) : (
-
-    reports.map((report: any) => (
-
-      <div
-        key={report.id}
-        className="flex items-center justify-between rounded-[26px] border border-zinc-800 bg-gradient-to-b from-[#1a1a1a] to-[#101010] p-6 hover:border-yellow-400 transition"
+      <motion.div
+        initial={{ opacity: 0, y: -25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: .5 }}
+        className="rounded-[34px] border border-white/10 bg-white/5 p-6 backdrop-blur-3xl"
       >
 
-        <div className="flex items-center gap-5">
-
-          <div className="h-14 w-14 rounded-2xl bg-yellow-400/15 flex items-center justify-center text-2xl">
-            🏠
-          </div>
+        <div className="flex items-center justify-between">
 
           <div>
 
-            <h3 className="text-xl font-bold">
-              {report.project || "Fără obiect"}
-            </h3>
+            <p className="text-xs uppercase tracking-[5px] text-yellow-400 font-bold">
 
-            <p className="text-zinc-400">
-              {report.kwp} kWp • {report.hours} ore
+              Bogar Sun
+
+            </p>
+
+            <h1 className="mt-2 text-3xl font-black">
+
+              Salut, Iulian 👋
+
+            </h1>
+
+            <p className="mt-2 text-zinc-400">
+
+              {currentDate}
+
+                {" • "}
+
+                {currentTime}
+
             </p>
 
           </div>
 
-        </div>
+          <button className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400 text-black shadow-[0_0_30px_rgba(250,204,21,.35)]">
 
-        <div className="text-right">
+            <Bell size={24} />
 
-          <p className="text-zinc-400">
-            {report.createdAt?.toDate().toLocaleDateString("ro-RO")}
-          </p>
-
-          <p className="text-yellow-400 text-2xl">
-            →
-          </p>
+          </button>
 
         </div>
 
-      </div>
+      </motion.div>
 
-    ))
+      {/* HERO CARD */}
 
-  )}
+      <motion.div
+  initial={{ opacity: 0, y: 25 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: .15 }}
+  className="relative overflow-hidden rounded-[34px] border border-yellow-400/30 bg-[#0d0d0d] p-6 shadow-[0_0_70px_rgba(250,204,21,.15)]"
+>
 
-</div>
+        <div className="absolute right-[-80px] top-[-80px] h-56 w-56 rounded-full bg-yellow-400/15 blur-[110px]" />
 
-      </div>
+        <Image
+  src="/images/hero-pattern.png"
+  alt="Hero"
+  fill
+  priority
+  className="absolute inset-0 object-cover opacity-80 pointer-events-none"
+/>
 
-<div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[96%] max-w-md rounded-[30px] border border-zinc-800 bg-[#161616]/95 backdrop-blur-xl shadow-2xl p-3">
+<div className="absolute inset-0 bg-gradient-to-r from-[#0d0d0d] via-[#0d0d0dcc] to-transparent z-10" />
 
-  <div className="grid grid-cols-4">
+<div className="relative z-20 max-w-[230px]">
 
-    <Link 
-    href="/worker/dashboard"
-    className="flex flex-col items-center gap-2 rounded-2xl py-3 text-yellow-400">
-      <House size={28} />
-      <span className="text-sm font-bold">
-        Acasă
-      </span>
-    </Link>
+  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl">
 
-    <Link 
-    href="/worker/history"
-    className="flex flex-col items-center gap-2 rounded-2xl py-3 text-zinc-400 hover:text-white">
-      <ClipboardList size={28} />
-      <span className="text-sm">
-        Istoric
-      </span>
-    </Link>
-
-    <Link 
-    href="/worker/statistics"
-    className="flex flex-col items-center gap-2 rounded-2xl py-3 text-zinc-400 hover:text-white">
-      <BarChart3 size={28} />
-      <span className="text-sm">
-        Statistici
-      </span>
-    </Link>
-
-    <Link 
-    href="/worker/profile" 
-    className="flex flex-col items-center gap-2 rounded-2xl py-3 text-zinc-400 hover:text-white">
-      <User size={28} />
-      <span className="text-sm">
-        Profil
-      </span>
-    </Link>
+    <ClipboardPlus
+      size={28}
+      className="text-yellow-400"
+    />
 
   </div>
 
+  <h2 className="mt-6 text-5xl font-black leading-none">
+
+    Trimite
+    <br />
+    raport
+
+  </h2>
+
+  <p className="mt-4 text-zinc-400 leading-7">
+
+    Completează raportul pentru ziua de astăzi.
+
+  </p>
+
+  <Link
+    href="/worker/report"
+    className="mt-8 flex h-14 items-center justify-center rounded-2xl bg-yellow-400 text-lg font-bold text-black transition hover:brightness-110"
+  >
+
+    Trimite raport
+
+    <ArrowRight
+      size={20}
+      className="ml-3"
+    />
+
+  </Link>
+
 </div>
 
-    </main>
+      </motion.div>
+      {/* STATISTICI */}
+
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: .25 }}
+  className="grid grid-cols-2 gap-4"
+>
+
+  <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#151515] p-5">
+
+    <div className="absolute left-0 bottom-0 h-1 w-full bg-gradient-to-r from-yellow-300 to-yellow-500" />
+
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400/10">
+
+      <Zap
+        size={28}
+        className="text-yellow-400"
+      />
+
+    </div>
+
+    <h2 className="mt-5 text-5xl font-black text-white">
+
+      {totalKw}
+
+    </h2>
+
+    <p className="mt-2 text-sm text-zinc-500">
+
+      kWp luna aceasta
+
+    </p>
+
+  </div>
+
+  <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#151515] p-5">
+
+    <div className="absolute left-0 bottom-0 h-1 w-full bg-gradient-to-r from-green-300 to-green-500" />
+
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-400/10">
+
+      <Clock3
+        size={28}
+        className="text-green-400"
+      />
+
+    </div>
+
+    <h2 className="mt-5 text-5xl font-black text-white">
+
+      {totalHours}
+
+    </h2>
+
+    <p className="mt-2 text-sm text-zinc-500">
+
+      Ore luna aceasta
+
+    </p>
+
+  </div>
+
+</motion.div>
+
+      {/* OBIECT */}
+
+      {/* TOP INFO */}
+
+{/* WEATHER */}
+
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: .30 }}
+  className="rounded-[30px] border border-white/10 bg-[#151515] p-6"
+>
+
+  <div className="flex items-center justify-between">
+
+    <div>
+
+      <p className="text-xs uppercase tracking-[3px] text-yellow-400">
+
+        Vreme acum
+
+      </p>
+
+      <h2 className="mt-2 text-5xl font-black">
+
+        {weather?.current?.temperature_2m ?? "--"}°
+
+      </h2>
+
+      <p className="mt-2 text-zinc-400">
+
+        Locația ta
+
+      </p>
+
+      <p className="mt-1 text-sm text-zinc-500">
+
+        Parțial însorit
+
+      </p>
+
+    </div>
+
+    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-yellow-400/10 text-6xl">
+
+      🌤️
+
+    </div>
+
+  </div>
+
+</motion.div>
+      {/* ULTIMUL RAPORT */}
+
+      <motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: .35 }}
+  className="rounded-[30px] border border-white/10 bg-[#151515] p-6"
+>
+
+  <div className="flex items-center gap-4">
+
+    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
+
+      <History
+        size={28}
+        className="text-zinc-300"
+      />
+
+    </div>
+
+    <div>
+
+      <h3 className="text-xl font-bold">
+
+        Ultimul raport
+
+      </h3>
+
+      <p className="text-zinc-500">
+
+        {lastReport ? (
+  <>
+    <p className="font-bold">
+      {lastReport.objectName}
+    </p>
+
+    <p className="text-zinc-400">
+      {lastReport.kwp} kWp • {lastReport.hours} ore
+    </p>
+  </>
+) : (
+  <p className="text-zinc-400">
+    Nu există încă rapoarte.
+  </p>
+)}
+
+      </p>
+
+    </div>
+
+  </div>
+
+  <Link
+    href="/worker/report"
+    className="mt-6 flex h-12 items-center justify-center rounded-xl bg-yellow-400 font-bold text-black"
+  >
+
+    Completează raport
+
+  </Link>
+
+</motion.div>
+
+    </div>
+
   );
+
 }

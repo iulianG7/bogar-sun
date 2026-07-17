@@ -29,7 +29,10 @@ interface Worker {
 
 interface Report {
   id: string;
-  worker: string;
+  worker?: string;
+  workerId?: string;
+  workerName?: string;
+  team?: string | number;
   kwp: number;
   hours: number;
   project: string;
@@ -118,8 +121,8 @@ export default function WorkerPage({
     `${worker.firstName ?? ""} ${worker.lastName ?? ""}`.trim();
 
   const workerReports = reports.filter(
-    r => r.worker === workerName
-  );
+  (r) => r.workerId === worker.uid
+);
 
   const totalKwp = workerReports.reduce(
     (s, r) => s + Number(r.kwp || 0),

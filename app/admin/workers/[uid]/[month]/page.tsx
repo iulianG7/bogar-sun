@@ -10,7 +10,9 @@ import { motion } from "framer-motion";
 
 interface Report {
   id: string;
-  worker: string;
+  worker?: string;
+  workerId?: string;
+  workerName?: string;
   project: string;
   kwp: number;
   hours: number;
@@ -95,18 +97,18 @@ export default function WorkerMonthPage({
 
   const monthReports = useMemo(() => {
 
-    return reports.filter(report => {
+  return reports.filter((report) => {
 
-      if (!report.createdAt?.toDate) return false;
+    if (!report.createdAt?.toDate) return false;
 
-      return (
-        report.worker === workerName &&
-        report.createdAt.toDate().getMonth() + 1 === Number(month)
-      );
+    return (
+      report.workerName === workerName &&
+      report.createdAt.toDate().getMonth() + 1 === Number(month)
+    );
 
-    });
+  });
 
-  }, [reports, workerName, month]);
+}, [reports, workerName, month]);
 
   return (
 

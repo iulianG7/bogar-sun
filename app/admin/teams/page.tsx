@@ -16,7 +16,9 @@ interface Worker {
 }
 
 interface Report {
-  worker: string;
+  worker?: string;
+  workerName?: string;
+  team?: string;
   kwp: number;
   hours: number;
 }
@@ -75,49 +77,33 @@ export default function TeamsPage() {
   const team1Kwp = useMemo(() => {
 
     return reports
-      .filter((r) =>
-        team1Workers.some((w) =>
-          (w.name || `${w.firstName} ${w.lastName}`) === r.worker
-        )
-      )
+      .filter((r) => String(r.team) === "1")
       .reduce((s, r) => s + Number(r.kwp || 0), 0);
 
-  }, [reports, team1Workers]);
+  }, [reports]);
 
   const team2Kwp = useMemo(() => {
 
     return reports
-      .filter((r) =>
-        team2Workers.some((w) =>
-          (w.name || `${w.firstName} ${w.lastName}`) === r.worker
-        )
-      )
+      .filter((r) => String(r.team) === "2")
       .reduce((s, r) => s + Number(r.kwp || 0), 0);
 
-  }, [reports, team2Workers]);
+  }, [reports]);
   const team1Hours = useMemo(() => {
 
     return reports
-      .filter((r) =>
-        team1Workers.some((w) =>
-          (w.name || `${w.firstName} ${w.lastName}`) === r.worker
-        )
-      )
+      .filter((r) => String(r.team) === "1")
       .reduce((s, r) => s + Number(r.hours || 0), 0);
 
-  }, [reports, team1Workers]);
+  }, [reports]);
 
   const team2Hours = useMemo(() => {
 
     return reports
-      .filter((r) =>
-        team2Workers.some((w) =>
-          (w.name || `${w.firstName} ${w.lastName}`) === r.worker
-        )
-      )
+      .filter((r) => String(r.team) === "2")
       .reduce((s, r) => s + Number(r.hours || 0), 0);
 
-  }, [reports, team2Workers]);
+  }, [reports]);
 
   return (
 
@@ -207,7 +193,7 @@ export default function TeamsPage() {
 
                 <h3 className="mt-3 text-4xl font-black text-yellow-400">
 
-                  {team1Kwp}
+                  {team1Kwp.toFixed(2)}
 
                 </h3>
 
@@ -328,7 +314,7 @@ export default function TeamsPage() {
 
                 <h3 className="mt-3 text-4xl font-black text-blue-400">
 
-                  {team2Kwp}
+                  {team2Kwp.toFixed(2)}
 
                 </h3>
 

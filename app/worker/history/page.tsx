@@ -1,224 +1,195 @@
 "use client";
 
-import WorkerBottomNav from "@/components/WorkerBottomNav";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
+  onSnapshot,
   query,
   where,
   orderBy,
-  onSnapshot,
 } from "firebase/firestore";
+import { motion } from "framer-motion";
+import {
+  CalendarDays,
+  Search,
+} from "lucide-react";
 
 export default function HistoryPage() {
-  const [reports, setReports] = useState<any[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [reports, setReports] = useState<any[]>([]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) return;
+    useEffect(() => {
 
-      const q = query(
-        collection(db, "reports"),
-        where("worker", "==", user.displayName),
-        orderBy("createdAt", "desc")
-      );
+  if (!auth.currentUser) return;
 
-      const unsub = onSnapshot(q, (snapshot) => {
-        setReports(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        );
-      });
+  const q = query(
+    collection(db, "reports"),
+    where("workerId", "==", auth.currentUser.uid),
+    orderBy("createdAt", "desc")
+  );
 
-      return () => unsub();
-    });
+  const unsub = onSnapshot(q, (snapshot) => {
 
-    return () => unsubscribe();
-  }, []);
+    setReports(
+      snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+    );
 
-  const monthReports = reports.filter((report) => {
-  if (!report.createdAt) return false;
+  });
 
-  const date = report.createdAt.toDate();
+  return () => unsub();
+
+}, []);
 
   return (
-    date.getMonth() === selectedMonth &&
-    date.getFullYear() === selectedYear
+
+    <div className="space-y-6 pb-28">
+
+      <motion.div
+        initial={{ opacity:0,y:-20 }}
+        animate={{ opacity:1,y:0 }}
+      >
+
+        <p className="text-xs uppercase tracking-[5px] text-yellow-400 font-bold">
+
+          Bogar Sun
+
+        </p>
+
+        <h1 className="mt-2 text-4xl font-black">
+
+          Istoric rapoarte
+
+        </h1>
+
+        <p className="mt-2 text-zinc-400">
+
+          Vezi toate rapoartele trimise.
+
+        </p>
+
+      </motion.div>
+
+      <div className="rounded-[30px] border border-white/10 bg-[#151515] p-5">
+
+        <div className="flex h-14 items-center gap-3 rounded-2xl bg-black/30 px-4">
+
+          <Search
+            size={20}
+            className="text-yellow-400"
+          />
+
+          <input
+            placeholder="Caută după dată..."
+            className="flex-1 bg-transparent outline-none"
+          />
+
+        </div>
+
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: .15 }}
+        className="space-y-4"
+      >
+
+        {reports.map((report) => (
+
+          <div
+            key={report.id}
+            className="rounded-[28px] border border-white/10 bg-[#151515] p-5 transition-all hover:border-yellow-400/30"
+          >
+
+            <div className="flex items-center justify-between">
+
+              <div className="flex items-center gap-4">
+
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-400/10">
+
+                  <CalendarDays
+                    size={22}
+                    className="text-yellow-400"
+                  />
+
+                </div>
+
+                <div>
+
+                  <h3 className="font-bold">
+
+                    {report.createdAt?.toDate().toLocaleDateString("ro-RO")}
+
+                  </h3>
+
+                  <p className="text-sm text-zinc-500">
+
+                    {report.project}
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="rounded-full bg-green-500/15 px-3 py-1">
+
+                <span className="text-sm font-semibold text-green-400">
+
+                  Trimis
+
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+
+              <div className="rounded-2xl bg-black/30 p-4">
+
+                <p className="text-xs text-zinc-500">
+
+                  kWp
+
+                </p>
+
+                <h4 className="mt-1 text-2xl font-black">
+
+                  {report.kwp}
+
+                </h4>
+
+              </div>
+
+              <div className="rounded-2xl bg-black/30 p-4">
+
+                <p className="text-xs text-zinc-500">
+
+                  Ore
+
+                </p>
+
+                <h4 className="mt-1 text-2xl font-black">
+
+                  {report.hours}
+
+                </h4>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </motion.div>
+
+    </div>
+
   );
-});
 
-  const totalKwp = monthReports
-    .filter((r) => r.didWork)
-    .reduce((sum, r) => sum + (Number(r.kwp) || 0), 0);
-
-  const totalHours = monthReports
-    .filter((r) => r.didWork)
-    .reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
-
-  const workedDays = monthReports.filter((r) => r.didWork).length;
-
-  return (
-    <main className="min-h-screen bg-[#0b0b0b] text-white p-8 pb-32">
-
-  <h1 className="text-5xl font-bold mb-2">
-    📋 Istoric
-  </h1>
-
-  <div className="mb-8 flex items-center justify-between rounded-2xl bg-[#161616] border border-zinc-800 p-4">
-
-  <button
-    onClick={() => {
-      if (selectedMonth === 0) {
-        setSelectedMonth(11);
-        setSelectedYear(selectedYear - 1);
-      } else {
-        setSelectedMonth(selectedMonth - 1);
-      }
-    }}
-    className="text-3xl font-bold hover:text-yellow-400"
-  >
-    ◀
-  </button>
-
-  <h2 className="text-2xl font-bold capitalize">
-    {new Date(selectedYear, selectedMonth).toLocaleDateString("ro-RO", {
-      month: "long",
-      year: "numeric",
-    })}
-  </h2>
-
-  <button
-    onClick={() => {
-      if (selectedMonth === 11) {
-        setSelectedMonth(0);
-        setSelectedYear(selectedYear + 1);
-      } else {
-        setSelectedMonth(selectedMonth + 1);
-      }
-    }}
-    className="text-3xl font-bold hover:text-yellow-400"
-  >
-    ▶
-  </button>
-
-</div>
-
-  <div className="space-y-5">
-
-    {monthReports.length === 0 ? (
-
-      <div className="rounded-[28px] border border-zinc-800 bg-[#161616] p-8 text-center text-zinc-400">
-        Nu există rapoarte în această lună.
-      </div>
-
-    ) : (
-
-      monthReports.map((report: any) => (
-
-        <div
-  key={report.id}
-  className="rounded-2xl border border-zinc-800 bg-[#161616] px-5 py-4 mb-3"
->
-
-  <div className="flex justify-between items-center">
-
-    <div>
-
-      <p className="text-yellow-400 font-bold text-lg">
-        {report.createdAt?.toDate().toLocaleDateString("ro-RO", {
-          day: "numeric",
-          month: "long",
-        })}
-      </p>
-
-      {report.didWork ? (
-        <>
-          <p className="font-semibold">
-            🏠 {report.project}
-          </p>
-
-          <p className="text-zinc-400 text-sm">
-            ⚡ {report.kwp} kWp • ⏰ {report.hours} ore
-          </p>
-        </>
-      ) : (
-        <p className="text-red-400 font-semibold">
-          🚫 {report.reason}
-        </p>
-      )}
-
-    </div>
-
-    <div className="text-right text-zinc-500 text-sm">
-      {report.createdAt?.toDate().toLocaleDateString("ro-RO", {
-        weekday: "long",
-      })}
-    </div>
-
-  </div>
-
-</div>
-
-      ))
-
-    )}
-
-  </div>
-
-  <div className="rounded-2xl bg-[#101010] p-5 text-center">
-
-    <h2 className="text-3xl font-bold mb-6">
-      Total luna aceasta
-    </h2>
-
-    <div className="grid grid-cols-3 gap-4 mt-4">
-
-      <div>
-
-        <p className="text-zinc-400">
-          ⚡ kWp
-        </p>
-
-        <h3 className="text-4xl font-bold text-yellow-400 mt-2">
-          {totalKwp.toFixed(1)}
-        </h3>
-
-      </div>
-
-      <div>
-
-        <p className="text-zinc-400">
-          ⏰ Ore
-        </p>
-
-        <h3 className="text-4xl font-bold text-blue-400 mt-2">
-          {totalHours.toFixed(1)}
-        </h3>
-
-      </div>
-
-      <div>
-
-        <p className="text-zinc-400">
-          📅 Zile
-        </p>
-
-        <h3 className="text-4xl font-bold text-green-400 mt-2">
-          {workedDays}
-        </h3>
-
-      </div>
-
-    </div>
-
-  </div>
-<WorkerBottomNav />
-</main>
-  );
 }
